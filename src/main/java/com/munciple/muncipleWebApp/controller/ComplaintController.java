@@ -75,12 +75,11 @@ public class ComplaintController {
     }
 
 
-    @GetMapping("/unresolved")
+    @GetMapping("/all")
     public ResponseEntity<?> getUnresolvedComplaints() {
 
         try {
-            System.out.println("Api hit");
-            List<ComplaintDetailsDTO> complaints = complaintService.getAllUnresolvedComplaints();
+            List<ComplaintDetailsDTO> complaints = complaintService.getAllComplaints();
             return  ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(complaints);

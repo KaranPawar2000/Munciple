@@ -156,6 +156,7 @@
             User user = complaint.getUser();
 
             return new ComplaintDetailsDTO(
+                    complaint.getComplaintId(),
                     complaint.getCategory(),
                     complaint.getDescription(),
                     complaint.getStatus(),
@@ -170,12 +171,13 @@
 
 
 
-        public List<ComplaintDetailsDTO> getAllUnresolvedComplaints() {
+        public List<ComplaintDetailsDTO> getAllComplaints() {
             List<Complaint> complaints = complaintRepository.findAllUnresolvedComplaints();
 
             return complaints.stream().map(complaint -> {
                 User user = complaint.getUser();
                 return new ComplaintDetailsDTO(
+                        complaint.getComplaintId(),
                         complaint.getCategory(),
                         complaint.getDescription(),
                         complaint.getStatus(),

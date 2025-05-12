@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ComplaintDetailsDTO {
+    private long id;
     private String category;
     private String description;
     private String status;

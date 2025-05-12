@@ -172,7 +172,7 @@
 
 
         public List<ComplaintDetailsDTO> getAllComplaints() {
-            List<Complaint> complaints = complaintRepository.findAllUnresolvedComplaints();
+            List<Complaint> complaints = complaintRepository.findAll();
 
             return complaints.stream().map(complaint -> {
                 User user = complaint.getUser();

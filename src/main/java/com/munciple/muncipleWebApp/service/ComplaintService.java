@@ -11,7 +11,9 @@
     import org.springframework.stereotype.Service;
     import org.springframework.web.client.RestTemplate;
 
+    import java.time.LocalDate;
     import java.time.LocalDateTime;
+    import java.time.format.DateTimeFormatter;
     import java.util.List;
     import java.util.stream.Collectors;
 
@@ -48,6 +50,11 @@
             MunicipalDepartment department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found"));
 
+            // Calculate estimated time: current time + 40 hours
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime estimatedTime = now.plusHours(40);
+
+
             Complaint complaint = new Complaint();
             complaint.setCategory(request.getCategory());
             complaint.setDescription(request.getDescription());
@@ -57,6 +64,7 @@
             complaint.setAssignedOfficer(assignedOfficer);
             complaint.setStatus("Assigned");
             complaint.setCreatedAt(LocalDateTime.now());
+            complaint.setEstimatedTime(estimatedTime);
             complaint.setLongitude(request.getLongitude());
             complaint.setLatitude(request.getLatitude());
             Complaint savedComplaint = complaintRepository.save(complaint);
@@ -67,7 +75,7 @@
             status.setUpdatedBy(assignedOfficer);
             status.setRemarks("Assigned to junior officer");
             status.setUpdatedAt(LocalDateTime.now());
-
+            status.setEstimatedTime(estimatedTime);
             complaintStatusRepository.save(status);
 
 
@@ -286,5 +294,36 @@
                     .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription()))
                     .collect(Collectors.toList());
         }
+
+        public void updateEstimatedTime(Request request) {
+            Complaint complaint = complaintRepository.findById(request.getComplaintId())
+                    .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
+            Officer officer = officerRepository.findByPhoneNumber(request.getPhoneNumber())
+                    .orElseThrow(() -> new RuntimeException("Officer not found with given phone number"));
+
+            // Parse estimatedTimeStr
+            // Parse the date string (format: yyyy/MM/dd)
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate parsedDate = LocalDate.parse(request.getEstimatedTimeStr(), formatter);
+            LocalDateTime estimatedTime = parsedDate.atStartOfDay(); // 00:00 by default
+
+            // Update complaint
+            complaint.setEstimatedTime(estimatedTime);
+            complaint.setStatus("In_Progress");
+            complaintRepository.save(complaint);
+
+            // Create new ComplaintStatus
+            ComplaintStatus status = new ComplaintStatus();
+            status.setComplaint(complaint);
+            status.setStatus("In_Progress");
+            status.setUpdatedBy(officer);
+            status.setRemarks(request.getRemarks());
+            status.setUpdatedAt(LocalDateTime.now());
+            status.setEstimatedTime(estimatedTime);
+
+            complaintStatusRepository.save(status);
+        }
+
 
     }

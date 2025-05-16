@@ -48,5 +48,8 @@ public class Complaint {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "estimatedTime")
+    private LocalDateTime estimatedTime ;
+
 
 }

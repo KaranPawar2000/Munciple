@@ -28,9 +28,15 @@ public class ComplaintStatus {
     @JoinColumn(name = "updated_by")
     private Officer updatedBy;
 
+
+
     @Column(columnDefinition = "TEXT")
     private String remarks;
 
     @Column(name = "updated_at", updatable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(name = "estimatedTime", updatable = false)
+    private LocalDateTime estimatedTime ;
+
 }

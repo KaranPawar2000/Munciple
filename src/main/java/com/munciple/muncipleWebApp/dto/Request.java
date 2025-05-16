@@ -2,6 +2,8 @@ package com.munciple.muncipleWebApp.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -16,7 +18,9 @@ public class Request {
     private String latitude;
     private Long complaintId;
     private String phoneNumber;
-
+    private String estimatedTimeStr;
     private String status;
     private String remarks;
+
+
 }

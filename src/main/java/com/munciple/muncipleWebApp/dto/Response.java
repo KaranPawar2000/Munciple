@@ -16,6 +16,18 @@ public class Response {
   private List<DepartmentDTO> departments;
   private long userId;
 
+  private List<OfficerInfo> officers;
 
+  @Data
+  public static class OfficerInfo {
+    private Long officerId;
+    private String name;
+    private String phoneNumber;
+    private String email;
+    private String role;
+    private String assignedZone;
+    private String departmentName;
+    private java.time.LocalDateTime createdAt;
+  }
 
 }

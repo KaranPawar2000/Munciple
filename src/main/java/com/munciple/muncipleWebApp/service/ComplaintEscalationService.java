@@ -33,12 +33,15 @@ public class ComplaintEscalationService {
 
     }
 
-    @Scheduled(fixedRate = 3600000) // Runs every hour
+    @Scheduled(fixedRate = 36000000) // Runs every hour
     @Transactional
     public void escalateUnresolvedComplaints() {
+        LocalDateTime now = LocalDateTime.now();
         LocalDateTime fortyHoursAgo = LocalDateTime.now().minusHours(10);
         List<Complaint> unresolvedComplaints = complaintRepository.findUnresolvedComplaints(fortyHoursAgo)
                 .stream()
+                .filter(c -> c.getEstimatedTime() != null)
+                .filter(c -> c.getEstimatedTime().isBefore(now))
                 .filter(complaint -> !"Resolved".equals(complaint.getStatus()))
                 .toList();
          System.out.println("Unresolved complaints: " + unresolvedComplaints.size());
@@ -69,7 +72,7 @@ public class ComplaintEscalationService {
                     escalation.setEscalatedAt(LocalDateTime.now());
                     escalationRepository.save(escalation);
 
-                } else if("Assigned".equals(complaint.getStatus())){
+                } else{
                     Officer escalationOfficer = officerRepository.findByDepartmentAndRole(complaint.getDepartment(), "2")
                             .orElseThrow(() -> new RuntimeException("Escalation officer with role 2 not found for department " + complaint.getDepartment().getDepartmentName()));
 

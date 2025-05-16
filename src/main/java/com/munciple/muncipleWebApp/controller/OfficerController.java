@@ -1,6 +1,7 @@
 package com.munciple.muncipleWebApp.controller;
 
 import com.munciple.muncipleWebApp.dto.OfficerDTO;
+import com.munciple.muncipleWebApp.dto.Response;
 import com.munciple.muncipleWebApp.service.OfficerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,5 +25,10 @@ public class OfficerController {
         return officer != null ? new ResponseEntity<>(officer, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/get/all")
+    public ResponseEntity<Response> getAllOfficers() {
+        Response response = officerService.getAllOfficers();
+        return ResponseEntity.ok(response);
+    }
 
 }

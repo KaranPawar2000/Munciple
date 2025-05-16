@@ -68,7 +68,7 @@ public class ComplaintController {
         try {
             System.out.println("request.getComplaintId(),request.getPhoneNumber()");
             complaintService.assignComplaintToOfficer(request.getComplaintId(), request.getPhoneNumber());
-            return ResponseEntity.ok(Map.of("message", "Complaint assigned successfully"));
+            return ResponseEntity.ok(Map.of("message", "Complaint assigned Successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
@@ -89,6 +89,18 @@ public class ComplaintController {
 
         }
     }
+
+
+    @PutMapping("/update-estimated-time")
+    public ResponseEntity<?> updateEstimatedTime(@RequestBody Request request) {
+        try {
+            complaintService.updateEstimatedTime(request);
+            return ResponseEntity.ok(Map.of("message", "Estimated time updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
 
 }

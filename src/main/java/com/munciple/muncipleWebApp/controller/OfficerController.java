@@ -5,10 +5,7 @@ import com.munciple.muncipleWebApp.dto.Response;
 import com.munciple.muncipleWebApp.service.OfficerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/officer")
@@ -29,6 +26,12 @@ public class OfficerController {
     public ResponseEntity<Response> getAllOfficers() {
         Response response = officerService.getAllOfficers();
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<OfficerDTO> updateOfficer(@RequestBody OfficerDTO dto) {
+        OfficerDTO updatedOfficer = officerService.updateOfficer(dto);
+        return ResponseEntity.ok(updatedOfficer);
     }
 
 }

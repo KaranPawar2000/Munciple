@@ -12,4 +12,6 @@ public class OfficerDTO {
     private String email;
     private String role;
     private String assignedZone;
+    private String departmentName;
+    private Long departmentId;
 }

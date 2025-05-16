@@ -27,6 +27,7 @@ public class Response {
     private String role;
     private String assignedZone;
     private String departmentName;
+    private Long dept_id;
     private java.time.LocalDateTime createdAt;
   }
 

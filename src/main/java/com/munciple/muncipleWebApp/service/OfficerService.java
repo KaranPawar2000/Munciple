@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class OfficerService {
     private final OfficerRepository officerRepository;
 
+
     private final MunicipalDepartmentRepository municipalDepartmentRepository;
     public OfficerService(OfficerRepository officerRepository, MunicipalDepartmentRepository municipalDepartmentRepository) {
         this.officerRepository = officerRepository;
@@ -94,4 +95,44 @@ public class OfficerService {
                 updated.getDepartment() != null ? updated.getDepartment().getDepartmentId() : null
         );
     }
+
+    public boolean deleteOfficer(Long officerId) {
+        if (officerRepository.existsById(officerId)) {
+            officerRepository.deleteById(officerId);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public OfficerDTO addOfficer(OfficerDTO dto) {
+        Officer officer = new Officer();
+        officer.setName(dto.getName());
+        officer.setPhoneNumber(dto.getPhoneNumber());
+        officer.setEmail(dto.getEmail());
+        officer.setRole(dto.getRole());
+        officer.setAssignedZone(dto.getAssignedZone());
+
+        MunicipalDepartment department = municipalDepartmentRepository.findById(dto.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        officer.setDepartment(department);
+
+        Officer saved = officerRepository.save(officer);
+
+        // Build DTO to return
+        OfficerDTO response = new OfficerDTO(
+                saved.getOfficerId(),
+                saved.getName(),
+                saved.getPhoneNumber(),
+                saved.getEmail(),
+                saved.getRole(),
+                saved.getAssignedZone(),
+                department.getDepartmentName(),
+                department.getDepartmentId()
+        );
+
+        return response;
+    }
+
 }

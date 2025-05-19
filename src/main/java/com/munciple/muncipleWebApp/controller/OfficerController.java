@@ -34,4 +34,20 @@ public class OfficerController {
         return ResponseEntity.ok(updatedOfficer);
     }
 
+    @DeleteMapping("/delete/{officerId}")
+    public ResponseEntity<String> deleteOfficer(@PathVariable Long officerId) {
+        boolean isDeleted = officerService.deleteOfficer(officerId);
+        if (isDeleted) {
+            return ResponseEntity.ok("Officer deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Officer not found.");
+        }
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<OfficerDTO> addOfficer(@RequestBody OfficerDTO dto) {
+        OfficerDTO createdOfficer = officerService.addOfficer(dto);
+        return new ResponseEntity<>(createdOfficer, HttpStatus.CREATED);
+    }
+
 }

@@ -11,10 +11,14 @@ public class ComplaintDetailsDtoTemplate {
 
         private String officerName;
         private String complaintId;
+        private String departmentId;
         private String category;
         private String description;
         private String locationUrl;
         private String imageUrl;
         private String phone;
-    }
+
+        public ComplaintDetailsDtoTemplate(String name, String s, String category, String description, String phoneNumber) {
+        }
+}
 

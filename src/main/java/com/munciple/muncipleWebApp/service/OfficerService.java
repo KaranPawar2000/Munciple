@@ -135,4 +135,25 @@ public class OfficerService {
         return response;
     }
 
+    public List<OfficerDTO> getOfficersByDepartment(Long departmentId) {
+        List<Officer> officers = officerRepository.findByDepartment_DepartmentId(departmentId);
+
+        if (officers.isEmpty()) {
+            throw new RuntimeException("No officers found for department ID: " + departmentId);
+        }
+
+        return officers.stream()
+                .map(officer -> new OfficerDTO(
+                        officer.getOfficerId(),
+                        officer.getName(),
+                        officer.getPhoneNumber(),
+                        officer.getEmail(),
+                        officer.getRole(),
+                        officer.getAssignedZone(),
+                        officer.getDepartment().getDepartmentName(),
+                        officer.getDepartment().getDepartmentId()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

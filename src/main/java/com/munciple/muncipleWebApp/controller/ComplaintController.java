@@ -1,9 +1,6 @@
 package com.munciple.muncipleWebApp.controller;
 
-import com.munciple.muncipleWebApp.dto.ComplaintDetailsDTO;
-import com.munciple.muncipleWebApp.dto.ComplaintDetailsDtoTemplate;
-import com.munciple.muncipleWebApp.dto.PredefinedComplaintDTO;
-import com.munciple.muncipleWebApp.dto.Request;
+import com.munciple.muncipleWebApp.dto.*;
 import com.munciple.muncipleWebApp.entity.Complaint;
 import com.munciple.muncipleWebApp.entity.PredefinedComplaint;
 import com.munciple.muncipleWebApp.service.ComplaintService;
@@ -48,13 +45,28 @@ public class ComplaintController {
     public ResponseEntity<?> updateComplaintStatus(@RequestBody Request request) {
         System.out.println("API Hit");
         try {
-            complaintService.updateComplaintStatus(request);
-            return ResponseEntity.ok(Map.of("message", "Complaint status updated successfully"));
+            OfficerDTO officer = complaintService.updateComplaintStatus(request);
+            ComplaintStatusResponseDTO response = new ComplaintStatusResponseDTO(
+                    "Complaint status updated successfully",
+                    officer
+            );
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/reopen-complaint")
+    public ResponseEntity<?> reopenComplaint(@RequestBody Request request) {
+        System.out.println("API Hit");
+        try {
+            complaintService.reopenComplaint(request);
+            return ResponseEntity.ok(Map.of("message", "Complaint Reopened successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
-
 
 
     @GetMapping("/predefined/{departmentId}")

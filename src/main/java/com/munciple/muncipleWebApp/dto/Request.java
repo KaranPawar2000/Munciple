@@ -14,6 +14,7 @@ public class Request {
     private String location;
     private Long departmentId;
     private Long userId;
+    private Long officerId;
     private String longitude;
     private String latitude;
     private Long complaintId;

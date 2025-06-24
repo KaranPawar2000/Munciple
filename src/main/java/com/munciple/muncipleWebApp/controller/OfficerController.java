@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/officer")
 public class OfficerController {
@@ -48,6 +51,17 @@ public class OfficerController {
     public ResponseEntity<OfficerDTO> addOfficer(@RequestBody OfficerDTO dto) {
         OfficerDTO createdOfficer = officerService.addOfficer(dto);
         return new ResponseEntity<>(createdOfficer, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/department/{departmentId}")
+    public ResponseEntity<?> getOfficersByDepartment(@PathVariable Long departmentId) {
+        try {
+            List<OfficerDTO> officers = officerService.getOfficersByDepartment(departmentId);
+            return ResponseEntity.ok(officers);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
 }

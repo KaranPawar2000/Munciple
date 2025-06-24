@@ -10,7 +10,7 @@ public class MuncipleWebAppApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MuncipleWebAppApplication.class, args);
-		System.out.println("It Working...!");
+		System.out.println("Its Working...!");
 	}
 
 }

@@ -49,11 +49,15 @@ public class ComplaintEscalationService {
                 Escalation latestEscalation = escalationRepository.findTopByComplaintOrderByEscalatedAtDesc(complaint)
                         .orElse(null);
 
-                if (latestEscalation.getEscalationLevel() == 1) {
-                    createNewEscalation(complaint, 2);
-                }
-                else if (latestEscalation.getEscalationLevel() == 2) {
-                    createNewEscalation(complaint, 3);
+                if (latestEscalation == null) {
+                    // If no escalation exists, create first level escalation
+                    createNewEscalation(complaint, 1);
+                } else {
+                    // Based on current escalation level, create next level
+                    int currentLevel = latestEscalation.getEscalationLevel();
+                    if (currentLevel < 3) { // Assuming max level is 3
+                        createNewEscalation(complaint, currentLevel + 1);
+                    }
                 }
             }
         }

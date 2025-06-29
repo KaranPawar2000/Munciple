@@ -93,17 +93,15 @@ public class ComplaintController {
 
 
     @GetMapping("/all")
-    public ResponseEntity<?> getUnresolvedComplaints() {
-
+    public ResponseEntity<?> getAllComplaints() {
         try {
             List<ComplaintDetailsDTO> complaints = complaintService.getAllComplaints();
-            return  ResponseEntity.ok()
+            return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(complaints);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
-
         }
     }
 

@@ -284,7 +284,7 @@
         }
 
         public List<ComplaintDetailsDTO> getAllComplaints() {
-            List<Complaint> complaints = complaintRepository.findAllUnresolvedComplaints();
+            List<Complaint> complaints = complaintRepository.findAll();
 
             if (complaints.isEmpty()) {
                 throw new RuntimeException("No complaints found");

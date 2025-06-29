@@ -77,12 +77,17 @@ public class ComplaintController {
 
     @PutMapping("/assign")
     public ResponseEntity<?> assignComplaintToOfficer(@RequestBody Request request) {
+        System.out.println("API Hit");
         try {
-            System.out.println("request.getComplaintId(),request.getPhoneNumber()");
-            complaintService.assignComplaintToOfficer(request.getComplaintId(), request.getPhoneNumber());
-            return ResponseEntity.ok(Map.of("message", "Complaint assigned Successfully"));
+            OfficerDTO officer = complaintService.assignComplaintToOfficer(request);
+            ComplaintStatusResponseDTO response = new ComplaintStatusResponseDTO(
+                    "Complaint status updated successfully",
+                    officer
+            );
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 

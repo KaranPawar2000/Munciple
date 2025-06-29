@@ -33,70 +33,44 @@ public class ComplaintEscalationService {
 
     }
 
-    @Scheduled(fixedRate = 36000000) // Runs every hour
+    @Scheduled(fixedRate = 172800000) // Runs every 48 hours
     @Transactional
     public void escalateUnresolvedComplaints() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fortyHoursAgo = LocalDateTime.now().minusHours(10);
-        List<Complaint> unresolvedComplaints = complaintRepository.findUnresolvedComplaints(fortyHoursAgo)
+        LocalDateTime fortyEightHoursAgo = LocalDateTime.now().minusHours(48);
+        List<Complaint> unresolvedComplaints = complaintRepository.findUnresolvedComplaints(fortyEightHoursAgo)
                 .stream()
-                .filter(c -> c.getEstimatedTime() != null)
-                .filter(c -> c.getEstimatedTime().isBefore(now))
                 .filter(complaint -> !"Resolved".equals(complaint.getStatus()))
                 .toList();
-         System.out.println("Unresolved complaints: " + unresolvedComplaints.size());
 
         if (!unresolvedComplaints.isEmpty()) {
             for (Complaint complaint : unresolvedComplaints) {
-                if ("Esc_1".equals(complaint.getStatus())) {
-                    Officer escalationOfficer = officerRepository.findByDepartmentAndRole(complaint.getDepartment(), "3")
-                            .orElseThrow(() -> new RuntimeException("Escalation officer with role 3 not found for department " + complaint.getDepartment().getDepartmentName()));
+                // Get the latest escalation for this complaint
+                Escalation latestEscalation = escalationRepository.findTopByComplaintOrderByEscalatedAtDesc(complaint)
+                        .orElse(null);
 
-                    complaint.setAssignedOfficer(escalationOfficer);
-                    complaint.setStatus("Esc_2");
-                    complaintRepository.save(complaint);
-
-                    ComplaintStatus complaintStatus = new ComplaintStatus();
-                    complaintStatus.setComplaint(complaint);
-                    complaintStatus.setRemarks("Assigned to Senior Officer");
-                    complaintStatus.setStatus("Esc_2");
-                    complaintStatus.setUpdatedBy(escalationOfficer);
-                    complaintStatus.setUpdatedAt(LocalDateTime.now());
-                    complaintStatusRepository.save(complaintStatus);
-
-                    Escalation escalation = new Escalation();
-                    escalation.setComplaint(complaint);
-                    escalation.setEscalatedTo(escalationOfficer);
-                    escalation.setReason("Query not solved");
-                    escalation.setEscalationLevel(2);
-                    escalation.setEscalatedAt(LocalDateTime.now());
-                    escalationRepository.save(escalation);
-
-                } else{
-                    Officer escalationOfficer = officerRepository.findByDepartmentAndRole(complaint.getDepartment(), "2")
-                            .orElseThrow(() -> new RuntimeException("Escalation officer with role 2 not found for department " + complaint.getDepartment().getDepartmentName()));
-
-                    complaint.setAssignedOfficer(escalationOfficer);
-                    complaint.setStatus("Esc_1");
-                    complaintRepository.save(complaint);
-
-                    ComplaintStatus complaintStatus = new ComplaintStatus();
-                    complaintStatus.setComplaint(complaint);
-                    complaintStatus.setRemarks("Assigned to Manager");
-                    complaintStatus.setStatus("Esc_1");
-                    complaintStatus.setUpdatedBy(escalationOfficer);
-                    complaintStatus.setUpdatedAt(LocalDateTime.now());
-                    complaintStatusRepository.save(complaintStatus);
-
-                    Escalation escalation = new Escalation();
-                    escalation.setComplaint(complaint);
-                    escalation.setEscalatedTo(escalationOfficer);
-                    escalation.setReason("Query not solved");
-                    escalation.setEscalationLevel(1);
-                    escalation.setEscalatedAt(LocalDateTime.now());
-                    escalationRepository.save(escalation);
+                if (latestEscalation.getEscalationLevel() == 1) {
+                    createNewEscalation(complaint, 2);
+                }
+                else if (latestEscalation.getEscalationLevel() == 2) {
+                    createNewEscalation(complaint, 3);
                 }
             }
         }
+    }
+
+    private void createNewEscalation(Complaint complaint, int level) {
+        Escalation newEscalation = new Escalation();
+        newEscalation.setComplaint(complaint);
+        newEscalation.setEscalatedAt(LocalDateTime.now());
+        newEscalation.setReason("Complaint not solved within 48 hours");
+        newEscalation.setEscalationLevel(level);
+
+        String role = String.valueOf(level);
+        Officer escalationOfficer = officerRepository.findByDepartmentAndRole(complaint.getDepartment(), role)
+                .orElseThrow(() -> new RuntimeException("Escalation officer with role " + role + " not found for department " + complaint.getDepartment().getDepartmentName()));
+
+        newEscalation.setEscalatedTo(escalationOfficer);
+        escalationRepository.save(newEscalation);
     }
 }

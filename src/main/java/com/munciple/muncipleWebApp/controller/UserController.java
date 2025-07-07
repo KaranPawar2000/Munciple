@@ -26,6 +26,15 @@
 
         @PostMapping("/register")
         public ResponseEntity<Response> registerUser(@RequestBody User user) {
+            // Validate required fields
+            if (user.getName() == null ||
+                    user.getWardNumber() == null || user.getWhatsappId() == null) {
+                Response response = new Response();
+                response.setStatus("error");
+                response.setMessage("Required fields missing: name, phoneNumber, wardNumber and whatsappId are mandatory");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
             Response response = userService.registerUser(user);
             HttpStatus status = response.getStatus().equals("success") ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;
             return new ResponseEntity<>(response, status);

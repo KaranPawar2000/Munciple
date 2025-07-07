@@ -40,6 +40,15 @@ public class ComplaintController {
         }
     }
 
+    @GetMapping("/get/{complaintId}/escalations")
+    public ResponseEntity<?> getComplaintEscalationHistory(@PathVariable Long complaintId) {
+        try {
+            ComplaintEscalationResponseDTO response = complaintService.getComplaintEscalationHistory(complaintId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
 
     @PutMapping("/update-status")
     public ResponseEntity<?> updateComplaintStatus(@RequestBody Request request) {

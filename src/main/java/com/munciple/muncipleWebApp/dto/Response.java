@@ -15,6 +15,7 @@ public class Response {
   private String userName;
   private List<DepartmentDTO> departments;
   private long userId;
+  private String wardNumber;
 
   private List<OfficerInfo> officers;
 

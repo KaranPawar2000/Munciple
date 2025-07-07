@@ -31,9 +31,9 @@ public class OfficerService {
                         officer.getPhoneNumber(),
                         officer.getEmail(),
                         officer.getRole(),
-                        officer.getAssignedZone(),
-                        officer.getDepartment() != null ? officer.getDepartment().getDepartmentName() : null,
-                        officer.getDepartment() != null ? officer.getDepartment().getDepartmentId() : null
+                        null,
+                        null,
+                        null
                 ))
                 .orElse(null);
     }
@@ -48,14 +48,8 @@ public class OfficerService {
             info.setPhoneNumber(officer.getPhoneNumber());
             info.setEmail(officer.getEmail());
             info.setRole(officer.getRole());
-            info.setAssignedZone(officer.getAssignedZone());
-            info.setCreatedAt(officer.getCreatedAt());
-            info.setDepartmentName(
-                    officer.getDepartment() != null ? officer.getDepartment().getDepartmentName() : null
-            );
-            info.setDept_id(
-                    officer.getDepartment() != null ? officer.getDepartment().getDepartmentId() : null
-            );
+            ;
+
             return info;
         }).collect(Collectors.toList());
 
@@ -75,12 +69,7 @@ public class OfficerService {
         if (dto.getPhoneNumber() != null) officer.setPhoneNumber(dto.getPhoneNumber());
         if (dto.getEmail() != null) officer.setEmail(dto.getEmail());
         if (dto.getRole() != null) officer.setRole(dto.getRole());
-        if (dto.getAssignedZone() != null) officer.setAssignedZone(dto.getAssignedZone());
-        if (dto.getDepartmentId() != null) {
-            MunicipalDepartment department = municipalDepartmentRepository.findById(dto.getDepartmentId())
-                    .orElseThrow(() -> new RuntimeException("Department not found"));
-            officer.setDepartment(department);
-        }
+
 
         Officer updated = officerRepository.save(officer);
 
@@ -90,9 +79,9 @@ public class OfficerService {
                 updated.getPhoneNumber(),
                 updated.getEmail(),
                 updated.getRole(),
-                updated.getAssignedZone(),
-                updated.getDepartment() != null ? updated.getDepartment().getDepartmentName() : null,
-                updated.getDepartment() != null ? updated.getDepartment().getDepartmentId() : null
+                null,
+                null,
+                 null
         );
     }
 
@@ -111,12 +100,11 @@ public class OfficerService {
         officer.setPhoneNumber(dto.getPhoneNumber());
         officer.setEmail(dto.getEmail());
         officer.setRole(dto.getRole());
-        officer.setAssignedZone(dto.getAssignedZone());
 
         MunicipalDepartment department = municipalDepartmentRepository.findById(dto.getDepartmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
-        officer.setDepartment(department);
+
 
         Officer saved = officerRepository.save(officer);
 
@@ -127,7 +115,7 @@ public class OfficerService {
                 saved.getPhoneNumber(),
                 saved.getEmail(),
                 saved.getRole(),
-                saved.getAssignedZone(),
+                null,
                 department.getDepartmentName(),
                 department.getDepartmentId()
         );
@@ -149,9 +137,9 @@ public class OfficerService {
                         officer.getPhoneNumber(),
                         officer.getEmail(),
                         officer.getRole(),
-                        officer.getAssignedZone(),
-                        officer.getDepartment().getDepartmentName(),
-                        officer.getDepartment().getDepartmentId()
+                        null,
+                        null,
+                        null
                 ))
                 .collect(Collectors.toList());
     }

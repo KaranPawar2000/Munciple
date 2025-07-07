@@ -22,6 +22,7 @@ public class Request {
     private String estimatedTimeStr;
     private String status;
     private String remarks;
+    private String wardNumber;
 
 
 }

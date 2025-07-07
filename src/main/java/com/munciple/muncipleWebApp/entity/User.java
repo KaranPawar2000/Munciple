@@ -20,8 +20,8 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "phone_number", unique = true, nullable = false)
-    private String phoneNumber;
+    @Column(name = "ward_number",nullable = false)
+    private String wardNumber;
 
     @Column(name = "whatsapp_id", unique = true)
     private String whatsappId;

@@ -38,6 +38,9 @@ public class Complaint {
     @JoinColumn(name = "department_id")
     private MunicipalDepartment department;
 
+    @Column(name = "ward_number",nullable = false)
+    private String wardNumber;
+
     @ManyToOne
     @JoinColumn(name = "assigned_officer_id")
     private Officer assignedOfficer;
@@ -50,6 +53,10 @@ public class Complaint {
 
     @Column(name = "estimatedTime")
     private LocalDateTime estimatedTime ;
+
+    @Column(name = "resolved_image_url", columnDefinition = "LONGTEXT")
+    private String resolvedImageUrl;
+
 
 
 }

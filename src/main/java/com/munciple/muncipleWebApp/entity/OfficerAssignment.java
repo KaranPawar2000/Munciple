@@ -1,39 +1,40 @@
 package com.munciple.muncipleWebApp.entity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
 
-
 @Entity
-@Table(name = "Officers")
+@Table(name = "Officer_Assignments")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Officer {
+public class OfficerAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long officerId;
+    private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "officer_id", nullable = false)
+    private Officer officer;
 
-    @Column(nullable = false, unique = true)
-    private String phoneNumber;
+    @Column(name = "ward_number", nullable = false)
+    private String wardNumber;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    private String designation;
-
-    private String role; // "1", "2", "3"
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "department_id", nullable = false)
     private MunicipalDepartment department;
 
+    @Column(name = "role", nullable = false)
+    private String role; // 1, 2, or 3
+
+    @Column(name = "assigned_zone")
+    private String assignedZone;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
 }
+

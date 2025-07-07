@@ -33,48 +33,65 @@ public class ComplaintEscalationService {
 
     }
 
-    @Scheduled(fixedRate = 172800000) // Runs every 48 hours
+    @Scheduled(fixedRate = 10000) // Runs every 48 hours
     @Transactional
     public void escalateUnresolvedComplaints() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fortyEightHoursAgo = LocalDateTime.now().minusHours(48);
-        List<Complaint> unresolvedComplaints = complaintRepository.findUnresolvedComplaints(fortyEightHoursAgo)
+
+        // Get all unresolved complaints that have passed their estimated time
+        List<Complaint> unresolvedComplaints = complaintRepository.findAllUnresolvedComplaints()
                 .stream()
-                .filter(complaint -> !"Resolved".equals(complaint.getStatus()))
+                .filter(complaint ->
+                        complaint.getEstimatedTime() != null &&
+                                now.isAfter(complaint.getEstimatedTime()) &&
+                                !"Resolved".equals(complaint.getStatus()))
                 .toList();
 
         if (!unresolvedComplaints.isEmpty()) {
             for (Complaint complaint : unresolvedComplaints) {
                 // Get the latest escalation for this complaint
-                Escalation latestEscalation = escalationRepository.findTopByComplaintOrderByEscalatedAtDesc(complaint)
+                Escalation latestEscalation = escalationRepository
+                        .findTopByComplaintOrderByEscalatedAtDesc(complaint)
                         .orElse(null);
 
                 if (latestEscalation == null) {
                     // If no escalation exists, create first level escalation
-                    createNewEscalation(complaint, 1);
+                    createNewEscalation(complaint, 1, 24); // 24 hours for level 1
                 } else {
-                    // Based on current escalation level, create next level
                     int currentLevel = latestEscalation.getEscalationLevel();
-                    if (currentLevel < 3) { // Assuming max level is 3
-                        createNewEscalation(complaint, currentLevel + 1);
+                    if (currentLevel == 1) {
+                        // Escalate to level 2 and assign to officer with role 2
+                        createNewEscalation(complaint, 2, 36); // 36 hours for level 2
+                    } else if (currentLevel == 2) {
+                        // Escalate to level 3 and assign to officer with role 3
+                        createNewEscalation(complaint, 3, 48); // 48 hours for level 3
                     }
                 }
             }
         }
     }
 
-    private void createNewEscalation(Complaint complaint, int level) {
+    private void createNewEscalation(Complaint complaint, int level, int estimatedHours) {
+        // Find officer with the corresponding role in the same department
+        String role = String.valueOf(level);
+        Officer escalationOfficer = officerRepository.findByDepartmentAndRole(complaint.getDepartment(), role)
+                .orElseThrow(() -> new RuntimeException("Escalation officer with role " + role +
+                        " not found for department " + complaint.getDepartment().getDepartmentName()));
+
+        // Create new escalation record
         Escalation newEscalation = new Escalation();
         newEscalation.setComplaint(complaint);
         newEscalation.setEscalatedAt(LocalDateTime.now());
-        newEscalation.setReason("Complaint not solved within 48 hours");
+        newEscalation.setReason("Complaint not resolved within estimated time");
         newEscalation.setEscalationLevel(level);
-
-        String role = String.valueOf(level);
-        Officer escalationOfficer = officerRepository.findByDepartmentAndRole(complaint.getDepartment(), role)
-                .orElseThrow(() -> new RuntimeException("Escalation officer with role " + role + " not found for department " + complaint.getDepartment().getDepartmentName()));
-
         newEscalation.setEscalatedTo(escalationOfficer);
         escalationRepository.save(newEscalation);
+
+        // Update complaint
+        complaint.setAssignedOfficer(escalationOfficer);
+        complaint.setEstimatedTime(complaint.getCreatedAt().plusHours(estimatedHours));
+        complaintRepository.save(complaint);
     }
+
+
 }

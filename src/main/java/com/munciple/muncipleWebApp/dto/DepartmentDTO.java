@@ -9,5 +9,6 @@ import lombok.Data;
 public class DepartmentDTO {
     long id;
     String name;
+    String marathiName;
     String city;
 }

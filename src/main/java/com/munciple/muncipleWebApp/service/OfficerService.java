@@ -15,16 +15,15 @@ import java.util.stream.Collectors;
 @Service
 public class OfficerService {
     private final OfficerRepository officerRepository;
-
-
     private final MunicipalDepartmentRepository municipalDepartmentRepository;
+
     public OfficerService(OfficerRepository officerRepository, MunicipalDepartmentRepository municipalDepartmentRepository) {
         this.officerRepository = officerRepository;
         this.municipalDepartmentRepository = municipalDepartmentRepository;
     }
 
     public OfficerDTO getOfficerByDepartmentAndRole(Long departmentId, String role) {
-        return officerRepository.findFirstByDepartment_DepartmentIdAndRole(departmentId, role)
+        return  officerRepository.findFirstByDepartments_DepartmentIdAndRole(departmentId, role)
                 .map(officer -> new OfficerDTO(
                         officer.getOfficerId(),
                         officer.getName(),

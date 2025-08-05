@@ -58,6 +58,8 @@ public class UserService {
             response.setMessage("User found.");
             response.setUserName(user.get().getName());
             response.setUserId(user.get().getUserId());
+            response.setWardNumber(user.get().getWardNumber());
+            response.setMarathiName(user.get().getMarathiName());
             return response;
         } else {
             response.setStatus("error");

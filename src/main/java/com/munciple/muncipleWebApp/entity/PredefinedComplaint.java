@@ -28,4 +28,10 @@ public class PredefinedComplaint {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private String marathiName;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String marathiDescription;
+
 }

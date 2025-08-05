@@ -20,9 +20,11 @@ public class ComplaintDetailsDTO {
     private String userName;
     private String whatsappId;
     private String imageUrl;  // Add this field
+    private String resolvedImageUrl;  // Add this field
     private String locationUrl;  // Add this field
     private Integer escalationLevel; // Add this field
-    private String lastEscalatedOfficerName;    // New field
+    private String lastEscalatedOfficerName;
+    private String lastEsclatedOfficerDesignation;// New field
     private String lastEscalatedOfficerPhone;
     }
 

@@ -8,8 +8,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
+
+    Optional<Complaint> findTopByUserUserIdOrderByCreatedAtDesc(Long userId);
 
 
     @Query("SELECT c FROM Complaint c WHERE c.status != 'Resolved' AND c.createdAt <= :timeLimit")

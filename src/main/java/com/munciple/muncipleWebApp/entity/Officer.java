@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -19,7 +20,8 @@ public class Officer {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+
+    @Column(nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false, unique = true)
@@ -29,11 +31,14 @@ public class Officer {
 
     private String role; // "1", "2", "3"
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false)
-    private MunicipalDepartment department;
+    @OneToMany(mappedBy = "officer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OfficerDepartment> departments;
+
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false)
+    private String marathiName;
 
 }

@@ -16,6 +16,7 @@
     import java.time.format.DateTimeFormatter;
     import java.util.Comparator;
     import java.util.List;
+    import java.util.Optional;
     import java.util.stream.Collectors;
 
 
@@ -149,28 +150,43 @@
 //            );
 //        }
 
-        public ComplaintDetailsDtoTemplate registerComplaint(Request request) {
-            // Validate required fields
-            if (request.getWardNumber() == null || request.getDepartmentId() == null) {
-                throw new RuntimeException("Ward number and department ID are required");
-            }
 
-            // Find user
+        public ComplaintDetailsDtoTemplate registerComplaint(Request request) {
+
+            Long userId = request.getUserId(); // adjust based on your Request DTO structure
+            Optional<Complaint> lastComplaintOpt = complaintRepository.findTopByUserUserIdOrderByCreatedAtDesc(userId);
+
+            if (lastComplaintOpt.isPresent()) {
+                Complaint lastComplaint = lastComplaintOpt.get();
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime oneHourAgo = now.minusHours(1);
+
+                if (lastComplaint.getCreatedAt().isAfter(oneHourAgo)) {
+                    throw new RuntimeException("You can only register a new complaint after 1 hour from your last complaint.");
+                }
+            }
+            // Find junior officer for the department and ward
+            Officer assignedOfficer = officerRepository
+                    .findJuniorOfficerByDepartmentAndWard(
+                            request.getDepartmentId(),
+                            request.getWardNumber()
+                    )
+                    .orElseThrow(() -> new RuntimeException(
+                            "No junior officer found for department ID: " +
+                                    request.getDepartmentId() +
+                                    " and ward number: " +
+                                    request.getWardNumber()
+                    ));
+
+            // Find user and department
             User user = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Find department
-            MunicipalDepartment department = departmentRepository.findById(request.getDepartmentId())
+            MunicipalDepartment department = departmentRepository
+                    .findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found"));
 
-            // Find junior officer for the ward and department
-            Officer assignedOfficer = officerRepository.findJuniorOfficerByWardAndDepartment(
-                    request.getWardNumber(),
-                    request.getDepartmentId()
-            ).orElseThrow(() -> new RuntimeException("No junior officer found for ward " +
-                    request.getWardNumber() + " and department " + department.getDepartmentName()));
-
-            // Create new complaint
+            // Create and save complaint
             Complaint complaint = new Complaint();
             complaint.setCategory(request.getCategory());
             complaint.setDescription(request.getDescription());
@@ -178,9 +194,9 @@
             complaint.setDepartment(department);
             complaint.setUser(user);
             complaint.setAssignedOfficer(assignedOfficer);
-            complaint.setStatus("Assigned");
+            complaint.setStatus("In Progress");
             complaint.setCreatedAt(LocalDateTime.now());
-            complaint.setEstimatedTime(LocalDateTime.now().plusHours(24));
+            complaint.setEstimatedTime(LocalDateTime.now().plusSeconds(24));
             complaint.setLongitude(request.getLongitude());
             complaint.setLatitude(request.getLatitude());
             complaint.setWardNumber(request.getWardNumber());
@@ -197,7 +213,7 @@
             status.setEstimatedTime(complaint.getEstimatedTime());
             complaintStatusRepository.save(status);
 
-            // Create initial escalation record
+            // Create initial escalation
             Escalation escalation = new Escalation();
             escalation.setComplaint(savedComplaint);
             escalation.setEscalatedTo(assignedOfficer);
@@ -206,65 +222,149 @@
             escalation.setEscalatedAt(LocalDateTime.now());
             escalationRepository.save(escalation);
 
-            // Create response
+            // Generate location URL
             String locationUrl = "https://www.google.com/maps/search/?api=1&query=" +
                     request.getLatitude() + "," + request.getLongitude();
 
+            // Return response
             return new ComplaintDetailsDtoTemplate(
                     assignedOfficer.getName(),
+                    assignedOfficer.getMarathiName(),
                     String.valueOf(savedComplaint.getComplaintId()),
-                    String.valueOf(savedComplaint.getDepartment().getDepartmentId()),
                     savedComplaint.getCategory(),
                     savedComplaint.getDescription(),
                     locationUrl,
                     savedComplaint.getImageUrl(),
                     assignedOfficer.getPhoneNumber()
             );
+
         }
 
-        public ComplaintDetailsDtoTemplate  reopenComplaint(Request request) {
-            System.out.println(request.getDepartmentId());
-            Officer assignedOfficer = officerRepository.findFirstByDepartment_DepartmentIdAndRole(request.getDepartmentId(), "1")
-                    .orElseThrow(() -> new RuntimeException("No officer found with role 1 in the department"));
 
 
-            Complaint existingComplaint = complaintRepository.findById(request.getComplaintId())
-                    .orElseThrow(() -> new RuntimeException("Complaint not found"));
+//        public ComplaintDetailsDtoTemplate registerComplaint(Request request) {
+//            // Validate required fields
+//            System.out.println(request.getWardNumber());
+//            if (request.getWardNumber() == null || request.getDepartmentId() == null) {
+//                throw new RuntimeException("Ward number and department ID are required");
+//            }
+//
+//            // Find user
+//            User user = userRepository.findById(request.getUserId())
+//                    .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//            // Find department
+//            MunicipalDepartment department = departmentRepository.findById(request.getDepartmentId())
+//                    .orElseThrow(() -> new RuntimeException("Department not found"));
+//
+//            Officer assignedOfficer = officerRepository
+//                    .findFirstByDepartmentAndWardAndRole(
+//                            request.getDepartmentId(),
+//                            request.getWardNumber()
+//                    )
+//                    .orElseThrow(() -> new RuntimeException(
+//                            "No junior officer found for department ID: " +
+//                                    request.getDepartmentId() +
+//                                    " and ward number: " +
+//                                    request.getWardNumber()
+//                    ));
+//
+//
+//            // Create new complaint
+//            Complaint complaint = new Complaint();
+//            complaint.setCategory(request.getCategory());
+//            complaint.setDescription(request.getDescription());
+//            complaint.setImageUrl(request.getImageUrl());
+//            complaint.setDepartment(department);
+//            complaint.setUser(user);
+//            complaint.setAssignedOfficer(assignedOfficer);
+//            complaint.setStatus("In Progress");
+//            complaint.setCreatedAt(LocalDateTime.now());
+//            complaint.setEstimatedTime(LocalDateTime.now().plusHours(24)); // Set estimated time to 24 hours from now
+//            complaint.setLongitude(request.getLongitude());
+//            complaint.setLatitude(request.getLatitude());
+//            complaint.setWardNumber(request.getWardNumber());
+//
+//            Complaint savedComplaint = complaintRepository.save(complaint);
+//
+//            // Create complaint status
+//            ComplaintStatus status = new ComplaintStatus();
+//            status.setComplaint(savedComplaint);
+//            status.setStatus("In Progress");
+//            status.setUpdatedBy(assignedOfficer);
+//            status.setRemarks("Assigned to junior officer of ward " + request.getWardNumber());
+//            status.setUpdatedAt(LocalDateTime.now());
+//            status.setEstimatedTime(complaint.getEstimatedTime());
+//            complaintStatusRepository.save(status);
+//
+//            // Create initial escalation record
+//            Escalation escalation = new Escalation();
+//            escalation.setComplaint(savedComplaint);
+//            escalation.setEscalatedTo(assignedOfficer);
+//            escalation.setEscalationLevel(1);
+//            escalation.setReason("Initial assignment to ward officer");
+//            escalation.setEscalatedAt(LocalDateTime.now());
+//            escalationRepository.save(escalation);
+//
+//            // Create response
+//            String locationUrl = "https://www.google.com/maps/search/?api=1&query=" +
+//                    request.getLatitude() + "," + request.getLongitude();
+//
+//            return new ComplaintDetailsDtoTemplate(
+//                    assignedOfficer.getName(),
+//                    String.valueOf(savedComplaint.getComplaintId()),
+//                    String.valueOf(savedComplaint.getDepartment().getDepartmentId()),
+//                    savedComplaint.getCategory(),
+//                    savedComplaint.getDescription(),
+//                    locationUrl,
+//                    savedComplaint.getImageUrl(),
+//                    assignedOfficer.getPhoneNumber()
+//            );
+//        }
 
-            // Calculate estimated time: current time + 40 hours
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime estimatedTime = now.plusHours(40);
-
-
-
-            existingComplaint.setDescription(request.getDescription());
-            existingComplaint.setImageUrl(request.getImageUrl());
-            existingComplaint.setAssignedOfficer(assignedOfficer);
-            existingComplaint.setStatus("Reopened");
-            existingComplaint.setEstimatedTime(estimatedTime);
-            Complaint savedComplaint = complaintRepository.save(existingComplaint);
-
-            ComplaintStatus status = new ComplaintStatus();
-            status.setComplaint(savedComplaint);
-            status.setStatus("Reopened");
-            status.setUpdatedBy(assignedOfficer);
-            status.setRemarks(" Reopened complaint assigned to junior officer");
-            status.setUpdatedAt(LocalDateTime.now());
-            status.setEstimatedTime(estimatedTime);
-            complaintStatusRepository.save(status);
-
-
-            // Prepare response DTO
-
-
-            return new ComplaintDetailsDtoTemplate(
-                    savedComplaint.getAssignedOfficer().getName(),
-                    String.valueOf(savedComplaint.getComplaintId()),
-                    savedComplaint.getCategory(),
-                    savedComplaint.getDescription(),
-                    assignedOfficer.getPhoneNumber()
-            );
-        }
+//        public ComplaintDetailsDtoTemplate  reopenComplaint(Request request) {
+//            System.out.println(request.getWardNumber());
+//            System.out.println(request);
+//            Officer assignedOfficer = officerRepository.findFirstJuniorOfficerByDepartmentAndWard(
+//                    request.getDepartmentId(),
+//                    request.getWardNumber()
+//            ).orElseThrow(() -> new RuntimeException(
+//                    "No junior officer found for department ID: " + request.getDepartmentId() +
+//                            " and ward number: " + request.getWardNumber()
+//            ));
+//
+//
+//            Complaint existingComplaint = complaintRepository.findById(request.getComplaintId())
+//                    .orElseThrow(() -> new RuntimeException("Complaint not found"));
+//
+//            // Calculate estimated time: current time + 40 hours
+//            LocalDateTime now = LocalDateTime.now();
+//            LocalDateTime estimatedTime = now.plusHours(40);
+//
+//
+//
+//            existingComplaint.setDescription(request.getDescription());
+//            existingComplaint.setImageUrl(request.getImageUrl());
+//            existingComplaint.setAssignedOfficer(assignedOfficer);
+//            existingComplaint.setStatus("Reopened");
+//            existingComplaint.setEstimatedTime(estimatedTime);
+//            Complaint savedComplaint = complaintRepository.save(existingComplaint);
+//
+//            ComplaintStatus status = new ComplaintStatus();
+//            status.setComplaint(savedComplaint);
+//            status.setStatus("Reopened");
+//            status.setUpdatedBy(assignedOfficer);
+//            status.setRemarks(" Reopened complaint assigned to junior officer");
+//            status.setUpdatedAt(LocalDateTime.now());
+//            status.setEstimatedTime(estimatedTime);
+//            complaintStatusRepository.save(status);
+//
+//
+//            // Prepare response DTO
+//
+//
+//            return null;
+//        }
 
 //        public void registerComplaint(Request request) {
 //            Officer assignedOfficer = officerRepository.findFirstByDepartment_DepartmentIdAndRole(request.getDepartmentId(), "1")
@@ -350,8 +450,9 @@
                     user.getName(),              // userName// phoneNumber
                     user.getWhatsappId(),        // whatsappId
                     complaint.getImageUrl(), // imageUrl
+                    complaint.getResolvedImageUrl(),
                     "https://www.google.com/maps/search/?api=1&query=" + complaint.getLatitude() + "," + complaint.getLongitude() // locationUrl
-                    ,0,null,null
+                    ,0,null,null,null
             );
         }
 
@@ -380,13 +481,14 @@
                 Integer escalationLevel = 0;
                 String lastEscalatedOfficerName = "";
                 String lastEscalatedOfficerPhone = "";
-
+                String lastEscalatedOfficeerDesignation = ""; // Assuming role is the designation
                 if (latestEscalation != null) {
                     escalationLevel = latestEscalation.getEscalationLevel();
                     Officer lastEscalatedOfficer = latestEscalation.getEscalatedTo();
                     if (lastEscalatedOfficer != null) {
                         lastEscalatedOfficerName = lastEscalatedOfficer.getName();
                         lastEscalatedOfficerPhone = lastEscalatedOfficer.getPhoneNumber();
+                        lastEscalatedOfficeerDesignation = lastEscalatedOfficer.getDesignation(); // Assuming role is the designation
                     }
                 }
 
@@ -402,9 +504,11 @@
                         user.getName(),
                         user.getWhatsappId(),
                         complaint.getImageUrl(),
+                        complaint.getResolvedImageUrl(),
                         "https://www.google.com/maps/search/?api=1&query=" + complaint.getLatitude() + "," + complaint.getLongitude(),
                         escalationLevel,
                         lastEscalatedOfficerName,
+                        lastEscalatedOfficeerDesignation,
                         lastEscalatedOfficerPhone
                 );
             }).collect(Collectors.toList());
@@ -445,6 +549,9 @@
                     complaint.getUser().getName(),
                     complaint.getUser().getWhatsappId(),
                     resolvedDate,
+                    complaint.getImageUrl(),
+                    complaint.getResolvedImageUrl(),
+                    "https://www.google.com/maps/search/?api=1&query=" + complaint.getLatitude() + "," + complaint.getLongitude(),
                     escalationHistory
             );
         }
@@ -511,52 +618,105 @@
 
 
         public OfficerDTO updateComplaintStatus(Request request) {
+            // First find the complaint
             Complaint complaint = complaintRepository.findById(request.getComplaintId())
                     .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-            Officer officer;
+            // Find the requesting officer
+            Officer requestingOfficer;
             if (request.getOfficerId() != null) {
-                // If officerId is present, find officer by ID
-                officer = officerRepository.findById(request.getOfficerId())
+                requestingOfficer = officerRepository.findById(request.getOfficerId())
                         .orElseThrow(() -> new RuntimeException("Officer not found with ID: " + request.getOfficerId()));
             } else if (request.getPhoneNumber() != null) {
-                // If no officerId but phone number is present, find officer by phone
-                officer = officerRepository.findByPhoneNumber(request.getPhoneNumber())
+                requestingOfficer = officerRepository.findByPhoneNumber(request.getPhoneNumber())
                         .orElseThrow(() -> new RuntimeException("Officer not found with phone number: " + request.getPhoneNumber()));
             } else {
                 throw new RuntimeException("Either officerId or phone number must be provided");
             }
+            System.out.println(complaint.getAssignedOfficer().getPhoneNumber());
+            System.out.println(request);
+            System.out.println(requestingOfficer.getOfficerId());
+            System.out.println(complaint.getAssignedOfficer().getOfficerId());
+            // Check if the requesting officer is the assigned officer
+            if (!requestingOfficer.getOfficerId().equals(complaint.getAssignedOfficer().getOfficerId())) {
+                throw new RuntimeException("Unauthorized: Only the assigned officer can update this complaint's status");
+            }
 
             // Update main complaint status
             complaint.setStatus(request.getStatus());
+            complaint.setResolvedImageUrl(request.getImageUrl());
             complaintRepository.save(complaint);
 
             // Save complaint status history
             ComplaintStatus complaintStatus = new ComplaintStatus();
             complaintStatus.setComplaint(complaint);
             complaintStatus.setStatus(request.getStatus());
-            complaintStatus.setUpdatedBy(officer);
+            complaintStatus.setUpdatedBy(requestingOfficer);
             complaintStatus.setRemarks(request.getRemarks());
             complaintStatus.setUpdatedAt(LocalDateTime.now());
-
             complaintStatusRepository.save(complaintStatus);
 
             return new OfficerDTO(
-                    officer.getOfficerId(),
-                    officer.getName(),
-                    officer.getPhoneNumber(),
-                    officer.getEmail(),
-                    officer.getRole(),
+                    requestingOfficer.getOfficerId(),
+                    requestingOfficer.getName(),
+                    requestingOfficer.getPhoneNumber(),
+                    requestingOfficer.getEmail(),
+                    requestingOfficer.getRole(),
                     null,
                     null,
                     null
-//                    officer.getAssignedZone(),
-//                    officer.getDepartment().getDepartmentName(),
-//                    officer.getDepartment().getDepartmentId()
             );
-        }// Return officer's phone number
+        }
 
-
+//        public OfficerDTO updateComplaintStatus(Request request) {
+//            Complaint complaint = complaintRepository.findById(request.getComplaintId())
+//                    .orElseThrow(() -> new RuntimeException("Complaint not found"));
+//
+//            Officer officer;
+//            if (request.getOfficerId() != null) {
+//                // If officerId is present, find officer by ID
+//                officer = officerRepository.findById(request.getOfficerId())
+//                        .orElseThrow(() -> new RuntimeException("Officer not found with ID: " + request.getOfficerId()));
+//            } else if (request.getPhoneNumber() != null) {
+//                // If no officerId but phone number is present, find officer by phone
+//                officer = officerRepository.findByPhoneNumber(request.getPhoneNumber())
+//                        .orElseThrow(() -> new RuntimeException("Officer not found with phone number: " + request.getPhoneNumber()));
+//            } else {
+//                throw new RuntimeException("Either officerId or phone number must be provided");
+//            }// Check if the requesting officer is the assigned officer
+//            if (!requestingOfficer.getOfficerId().equals(complaint.getAssignedOfficer().getOfficerId())) {
+//                throw new RuntimeException("Unauthorized: Only the assigned officer can update this complaint's status");
+//            }
+//
+//
+//            // Update main complaint status
+//            complaint.setStatus(request.getStatus());
+//            complaintRepository.save(complaint);
+//
+//            // Save complaint status history
+//            ComplaintStatus complaintStatus = new ComplaintStatus();
+//            complaintStatus.setComplaint(complaint);
+//            complaintStatus.setStatus(request.getStatus());
+//            complaintStatus.setUpdatedBy(officer);
+//            complaintStatus.setRemarks(request.getRemarks());
+//            complaintStatus.setUpdatedAt(LocalDateTime.now());
+//
+//            complaintStatusRepository.save(complaintStatus);
+//
+//            return new OfficerDTO(
+//                    officer.getOfficerId(),
+//                    officer.getName(),
+//                    officer.getPhoneNumber(),
+//                    officer.getEmail(),
+//                    officer.getRole(),
+//                    null,
+//                    null,
+//                    null
+////                    officer.getAssignedZone(),
+////                    officer.getDepartment().getDepartmentName(),
+////                    officer.getDepartment().getDepartmentId()
+//            );
+//        }
 
 //        private void sendWhatsAppMessage(Complaint complaint) {
 //            String apiUrl = "https://api.auurumdigital.com/v2/wamessage/sendMessage";
@@ -601,37 +761,42 @@
             }
 
             return complaints.stream()
-                    .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription()))
+                    .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription(),c.getMarathiName(),c.getMarathiDescription()))
                     .collect(Collectors.toList());
         }
 
         public void updateEstimatedTime(Request request) {
+            // Get complaint
             Complaint complaint = complaintRepository.findById(request.getComplaintId())
                     .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-            Officer officer = officerRepository.findByPhoneNumber(request.getPhoneNumber())
+            // Get officer
+            Officer requestingOfficer = officerRepository.findFirstByPhoneNumber(request.getPhoneNumber())
                     .orElseThrow(() -> new RuntimeException("Officer not found with given phone number"));
 
-            // Parse estimatedTimeStr
-            // Parse the date string (format: yyyy/MM/dd)
+            // Check if requesting officer is the assigned officer
+            if (!requestingOfficer.getOfficerId().equals(complaint.getAssignedOfficer().getOfficerId())) {
+                throw new RuntimeException("Unauthorized: Only the assigned officer can update estimated time");
+            }
+
+            // Parse date and set time
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             LocalDate parsedDate = LocalDate.parse(request.getEstimatedTimeStr(), formatter);
-            LocalDateTime estimatedTime = parsedDate.atStartOfDay(); // 00:00 by default
+            LocalDateTime estimatedTime = parsedDate.atStartOfDay();
 
             // Update complaint
             complaint.setEstimatedTime(estimatedTime);
             complaint.setStatus("Pending");
             complaintRepository.save(complaint);
 
-            // Create new ComplaintStatus
+            // Create and save complaint status
             ComplaintStatus status = new ComplaintStatus();
             status.setComplaint(complaint);
             status.setStatus("Pending");
-            status.setUpdatedBy(officer);
+            status.setUpdatedBy(requestingOfficer);
             status.setRemarks(request.getRemarks());
             status.setUpdatedAt(LocalDateTime.now());
             status.setEstimatedTime(estimatedTime);
-
             complaintStatusRepository.save(status);
         }
 

@@ -26,4 +26,7 @@ public class MunicipalDepartment {
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PredefinedComplaint> predefinedComplaints; // List of predefined complaints
 
+    @Column(name = "marathi_department_name", unique = true, nullable = false)
+    private String MarathidepartmentName;
+
 }

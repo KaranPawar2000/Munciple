@@ -23,6 +23,7 @@ public class ComplaintController {
     @PostMapping("/register")
     public ResponseEntity<?> registerComplaint(@RequestBody Request request) {
         try {
+            System.out.println(request);
             ComplaintDetailsDtoTemplate dto = complaintService.registerComplaint(request);
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } catch (RuntimeException e) {
@@ -66,16 +67,16 @@ public class ComplaintController {
         }
     }
 
-    @PutMapping("/reopen-complaint")
-    public ResponseEntity<?> reopenComplaint(@RequestBody Request request) {
-        System.out.println("API Hit");
-        try {
-            complaintService.reopenComplaint(request);
-            return ResponseEntity.ok(Map.of("message", "Complaint Reopened successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-        }
-    }
+//    @PutMapping("/reopen-complaint")
+//    public ResponseEntity<?> reopenComplaint(@RequestBody Request request) {
+//        System.out.println("API Hit");
+//        try {
+//            complaintService.reopenComplaint(request);
+//            return ResponseEntity.ok(Map.of("message", "Complaint Reopened successfully"));
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+//        }
+//    }
 
 
     @GetMapping("/predefined/{departmentId}")
@@ -120,7 +121,7 @@ public class ComplaintController {
         try {
             complaintService.updateEstimatedTime(request);
             return ResponseEntity.ok(Map.of("message", "Estimated time updated successfully"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

@@ -16,5 +16,8 @@ public class ComplaintEscalationResponseDTO {
     private String citizenName;
     private String citizenContact;
     private String resolvedDate;
+    private String complaintImageUrl;
+    private String resolvedImageUrl;
+    private String locationUrl;
     private List<EscalationDTO> escalationHistory;
 }

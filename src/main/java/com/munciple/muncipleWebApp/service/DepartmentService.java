@@ -21,6 +21,7 @@ public class DepartmentService {
         return departments.stream().map(dept -> new DepartmentDTO(
                 dept.getDepartmentId(),
                 dept.getDepartmentName(),
+                dept.getMarathidepartmentName(),
                 dept.getCity()
         )).collect(Collectors.toList());
     }

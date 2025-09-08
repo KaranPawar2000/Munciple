@@ -2,8 +2,10 @@ package com.munciple.muncipleWebApp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class PredefinedComplaintDTO {
     private Long id;
@@ -11,4 +13,5 @@ public class PredefinedComplaintDTO {
     private String description;
     private String marathiName;
     private String marathiDescription;
+    private Long departmentId;
 }

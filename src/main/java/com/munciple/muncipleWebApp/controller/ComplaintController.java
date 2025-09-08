@@ -126,6 +126,16 @@ public class ComplaintController {
         }
     }
 
+    @PostMapping("/add/predefined")
+    public ResponseEntity<?> addPredefinedComplaint(@RequestBody PredefinedComplaintDTO dto) {
+        try {
+            PredefinedComplaintDTO savedComplaint = complaintService.addPredefinedComplaint(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedComplaint);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
 
 }

@@ -440,7 +440,8 @@
 
             return new ComplaintDetailsDTO(
                     complaint.getComplaintId(),   // id
-                    complaint.getCategory(),      // category
+                    complaint.getDepartment().getDepartmentName(),
+                    complaint.getDepartment().getMarathidepartmentName(),// category
                     complaint.getDescription(),   // description
                     complaint.getStatus(),        // status
                     complaint.getCreatedAt().toString(), // createdAt
@@ -494,7 +495,8 @@
 
                 return new ComplaintDetailsDTO(
                         complaint.getComplaintId(),
-                        complaint.getCategory(),
+                        complaint.getDepartment().getDepartmentName(),
+                        complaint.getDepartment().getMarathidepartmentName(),
                         complaint.getDescription(),
                         complaint.getStatus(),
                         complaint.getCreatedAt().toString(),
@@ -761,7 +763,7 @@
             }
 
             return complaints.stream()
-                    .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription(),c.getMarathiName(),c.getMarathiDescription()))
+                    .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription(),c.getMarathiName(),c.getMarathiDescription(),c.getDepartment().getDepartmentId()))
                     .collect(Collectors.toList());
         }
 
@@ -799,6 +801,32 @@
             status.setEstimatedTime(estimatedTime);
             complaintStatusRepository.save(status);
         }
+
+        public PredefinedComplaintDTO addPredefinedComplaint(PredefinedComplaintDTO dto) {
+            MunicipalDepartment department = departmentRepository.findById(dto.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + dto.getDepartmentId()));
+
+            PredefinedComplaint complaint = new PredefinedComplaint();
+            complaint.setName(dto.getName());
+            complaint.setDescription(dto.getDescription());
+            complaint.setMarathiName(dto.getMarathiName());
+            complaint.setMarathiDescription(dto.getMarathiDescription());
+            complaint.setDepartment(department);
+
+            PredefinedComplaint saved = predefinedComplaintRepository.save(complaint);
+
+            PredefinedComplaintDTO response = new PredefinedComplaintDTO();
+            response.setId(saved.getId());
+            response.setName(saved.getName());
+            response.setDescription(saved.getDescription());
+            response.setMarathiName(saved.getMarathiName());
+            response.setMarathiDescription(saved.getMarathiDescription());
+            response.setDepartmentId(saved.getDepartment().getDepartmentId());
+
+            return response;
+        }
+
+
 
 
     }

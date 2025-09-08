@@ -29,4 +29,7 @@ public class MunicipalDepartment {
     @Column(name = "marathi_department_name", unique = true, nullable = false)
     private String MarathidepartmentName;
 
+    @Column(name = "status", nullable = false)
+    private boolean status;
+
 }

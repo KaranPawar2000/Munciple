@@ -20,6 +20,16 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
+    @GetMapping("/get/active/departments")
+    public ResponseEntity<Response> getActiveDepartments() {
+        List<DepartmentDTO> departments = departmentService.getAllActiveDepartments();
+        Response response = new Response();
+        response.setStatus("success");
+        response.setMessage("Departments fetched successfully");
+        response.setDepartments(departments);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/get/departments")
     public ResponseEntity<Response> getDepartments() {
         List<DepartmentDTO> departments = departmentService.getAllDepartments();

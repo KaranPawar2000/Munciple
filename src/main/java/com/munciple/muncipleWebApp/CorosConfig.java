@@ -17,7 +17,8 @@ public class CorosConfig {
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedOrigins(
                                 "http://localhost:3000",
-                                "https://fbcb-223-233-80-42.ngrok-free.app"
+                                "https://fbcb-223-233-80-42.ngrok-free.app",
+                                "http://45.114.143.153:3000"
                         )
                         .allowedHeaders("*")
                         .allowCredentials(true);

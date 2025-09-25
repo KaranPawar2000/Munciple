@@ -34,4 +34,10 @@ public class PredefinedComplaint {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String marathiDescription;
 
+    @Column(name = "status", nullable = false)
+    private boolean status;
+
+    @Column(name = "photo", nullable = false)
+    private boolean photoRequired;
+
 }

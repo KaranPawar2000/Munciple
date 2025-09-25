@@ -440,8 +440,7 @@
 
             return new ComplaintDetailsDTO(
                     complaint.getComplaintId(),   // id
-                    complaint.getDepartment().getDepartmentName(),
-                    complaint.getDepartment().getMarathidepartmentName(),// category
+                    complaint.getDepartment().getDepartmentName(),// category
                     complaint.getDescription(),   // description
                     complaint.getStatus(),        // status
                     complaint.getCreatedAt().toString(), // createdAt
@@ -492,11 +491,10 @@
                         lastEscalatedOfficeerDesignation = lastEscalatedOfficer.getDesignation(); // Assuming role is the designation
                     }
                 }
-
+                System.out.println("dept name:-"+ complaint.getDepartment().getDepartmentName());
                 return new ComplaintDetailsDTO(
                         complaint.getComplaintId(),
                         complaint.getDepartment().getDepartmentName(),
-                        complaint.getDepartment().getMarathidepartmentName(),
                         complaint.getDescription(),
                         complaint.getStatus(),
                         complaint.getCreatedAt().toString(),

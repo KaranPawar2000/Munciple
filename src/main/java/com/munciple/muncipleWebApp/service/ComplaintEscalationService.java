@@ -40,7 +40,7 @@ public class ComplaintEscalationService {
 
     }
 
-    @Scheduled(fixedRate = 1000000000) // Runs every 48 hours
+    @Scheduled(fixedRate = 86400000) // Runs every 24 hours
     @Transactional
     public void escalateUnresolvedComplaints() {
         LocalDateTime now = LocalDateTime.now();
@@ -63,13 +63,13 @@ public class ComplaintEscalationService {
 
                 Officer escalatedOfficer;
                 if (latestEscalation == null) {
-                    escalatedOfficer = createNewEscalation(complaint, 1, 24);
+                    escalatedOfficer = createNewEscalation(complaint, 1, 48);
                 } else {
                     int currentLevel = latestEscalation.getEscalationLevel();
                     if (currentLevel == 1) {
-                        escalatedOfficer = createNewEscalation(complaint, 2, 36);
+                        escalatedOfficer = createNewEscalation(complaint, 2, 96);
                     } else if (currentLevel == 2) {
-                        escalatedOfficer = createNewEscalation(complaint, 3, 48);
+                        escalatedOfficer = createNewEscalation(complaint, 3, 144);
                     } else {
                         continue;
                     }

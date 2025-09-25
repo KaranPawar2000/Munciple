@@ -105,6 +105,7 @@ public class ComplaintController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllComplaints() {
         try {
+            System.out.println("API Hit - Get All Complaints");
             List<ComplaintDetailsDTO> complaints = complaintService.getAllComplaints();
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)

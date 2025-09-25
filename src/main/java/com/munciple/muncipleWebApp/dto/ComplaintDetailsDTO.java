@@ -10,8 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ComplaintDetailsDTO {
     private long id;
-    private String Englishcategory;
-    private String MarathiCategory;
+
+    private String category;
     private String description;
     private String status;
     private String createdAt;

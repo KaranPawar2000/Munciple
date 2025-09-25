@@ -40,4 +40,7 @@ public class User {
 
     private Long IsEnglishMarathi;
 
+    @Column(name = "status", nullable = false)
+    private boolean status;
+
 }

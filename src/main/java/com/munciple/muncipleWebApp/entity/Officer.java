@@ -41,4 +41,7 @@ public class Officer {
     @Column(nullable = false)
     private String marathiName;
 
+    @Column(name = "status", nullable = false)
+    private boolean status;
+
 }

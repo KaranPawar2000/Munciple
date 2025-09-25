@@ -16,6 +16,17 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
+    public List<DepartmentDTO> getAllActiveDepartments() {
+        List<MunicipalDepartment> departments = departmentRepository.findByStatusTrue();
+        return departments.stream().map(dept -> new DepartmentDTO(
+                dept.getDepartmentId(),
+                dept.getDepartmentName(),
+                dept.getMarathidepartmentName(),
+                dept.getCity(),
+                dept.isStatus()
+        )).collect(Collectors.toList());
+    }
+
     public List<DepartmentDTO> getAllDepartments() {
         List<MunicipalDepartment> departments = departmentRepository.findAll();
         return departments.stream().map(dept -> new DepartmentDTO(

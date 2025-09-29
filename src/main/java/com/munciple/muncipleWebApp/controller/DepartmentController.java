@@ -64,6 +64,18 @@ public class DepartmentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/get/{id}")
+    public ResponseEntity<Response> getDepartmentById(@PathVariable Long id) {
+        DepartmentDTO departmentDTO = departmentService.getDepartmentById(id);
+
+        Response response = new Response();
+        response.setStatus("success");
+        response.setMessage("Department fetched successfully");
+        response.setDepartments(List.of(departmentDTO)); // wrap single DTO in a list
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
 
 }

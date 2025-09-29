@@ -77,5 +77,18 @@ public class DepartmentService {
         );
     }
 
+    public DepartmentDTO getDepartmentById(Long id) {
+        MunicipalDepartment department = departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
+
+        return new DepartmentDTO(
+                department.getDepartmentId(),
+                department.getDepartmentName(),
+                department.getMarathidepartmentName(),
+                department.getCity(),
+                department.isStatus()
+        );
+    }
+
 
 }

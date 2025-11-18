@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class MuncipleWebAppApplication {
+public class  MuncipleWebAppApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MuncipleWebAppApplication.class, args);

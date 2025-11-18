@@ -14,4 +14,6 @@ public class PredefinedComplaintDTO {
     private String marathiName;
     private String marathiDescription;
     private Long departmentId;
+    private boolean status;
+    private boolean photoRequired;
 }

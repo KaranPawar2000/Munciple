@@ -28,6 +28,7 @@ public class OfficerController {
 
     @GetMapping("/get/all")
     public ResponseEntity<List<GetAllOfficerDTO>> getAllOfficers() {
+
         List<GetAllOfficerDTO> response = officerService.getAllOfficers();
         return ResponseEntity.ok(response);
     }

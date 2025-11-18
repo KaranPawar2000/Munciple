@@ -85,6 +85,34 @@ public class ComplaintController {
         return ResponseEntity.ok(complaints);
     }
 
+
+    @PutMapping("/predefined/{id}")
+    public ResponseEntity<?> updatePredefinedComplaint(
+            @PathVariable Long id,
+            @RequestBody PredefinedComplaintDTO dto) {
+        try {
+            PredefinedComplaintDTO updated = complaintService.updatePredefinedComplaint(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/predefined/id/{id}")
+    public ResponseEntity<?> getPredefinedComplaintById(@PathVariable Long id) {
+        try {
+            PredefinedComplaintDTO dto = complaintService.getPredefinedComplaintById(id);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
+
+
     @PutMapping("/assign")
     public ResponseEntity<?> assignComplaintToOfficer(@RequestBody Request request) {
         System.out.println("API Hit");

@@ -196,7 +196,7 @@
             complaint.setAssignedOfficer(assignedOfficer);
             complaint.setStatus("In Progress");
             complaint.setCreatedAt(LocalDateTime.now());
-            complaint.setEstimatedTime(LocalDateTime.now().plusSeconds(24));
+            complaint.setEstimatedTime(LocalDateTime.now().plusHours(24));
             complaint.setLongitude(request.getLongitude());
             complaint.setLatitude(request.getLatitude());
             complaint.setWardNumber(request.getWardNumber());
@@ -761,9 +761,91 @@
             }
 
             return complaints.stream()
-                    .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription(),c.getMarathiName(),c.getMarathiDescription(),c.getDepartment().getDepartmentId()))
+                    .map(c -> new PredefinedComplaintDTO(c.getId(), c.getName(), c.getDescription(),c.getMarathiName(),c.getMarathiDescription(),c.getDepartment().getDepartmentId(),c.getStatus(),c.getPhotoRequired()))
                     .collect(Collectors.toList());
         }
+
+
+
+        public PredefinedComplaintDTO updatePredefinedComplaint(Long id, PredefinedComplaintDTO dto) {
+            PredefinedComplaint existing = predefinedComplaintRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Predefined complaint not found with id: " + id));
+
+            // Update fields only if provided (partial update)
+            if (dto.getName() != null) {
+                existing.setName(dto.getName());
+            }
+            if (dto.getDescription() != null) {
+                existing.setDescription(dto.getDescription());
+            }
+            if (dto.getMarathiName() != null) {
+                existing.setMarathiName(dto.getMarathiName());
+            }
+            if (dto.getMarathiDescription() != null) {
+                existing.setMarathiDescription(dto.getMarathiDescription());
+            }
+
+            // If departmentId provided, validate and set department
+            if (dto.getDepartmentId() != null) {
+                MunicipalDepartment dept = departmentRepository.findById(dto.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Department not found with id: " + dto.getDepartmentId()));
+                existing.setDepartment(dept);
+            }
+
+            // Update status and photo requirement if present in DTO (assuming boolean wrapper in DTO)
+
+                existing.setStatus(dto.isStatus());
+
+
+                existing.setPhotoRequired(dto.isPhotoRequired());
+
+
+            PredefinedComplaint saved = predefinedComplaintRepository.save(existing);
+
+            // Build response DTO
+            PredefinedComplaintDTO response = new PredefinedComplaintDTO();
+            response.setId(saved.getId());
+            response.setName(saved.getName());
+            response.setDescription(saved.getDescription());
+            response.setMarathiName(saved.getMarathiName());
+            response.setMarathiDescription(saved.getMarathiDescription());
+            response.setDepartmentId(saved.getDepartment().getDepartmentId());
+            response.setStatus(saved.getStatus());           // adapt getters if your DTO uses Boolean
+            response.setPhotoRequired(saved.getPhotoRequired());
+
+            return response;
+        }
+
+
+        public PredefinedComplaintDTO getPredefinedComplaintById(Long id) {
+            PredefinedComplaint complaint = predefinedComplaintRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Predefined complaint not found with id: " + id));
+
+            // Build and return DTO — adapt constructor/getters if your DTO fields differ
+            PredefinedComplaintDTO dto = new PredefinedComplaintDTO();
+            dto.setId(complaint.getId());
+            dto.setName(complaint.getName());
+            dto.setDescription(complaint.getDescription());
+            dto.setMarathiName(complaint.getMarathiName());
+            dto.setMarathiDescription(complaint.getMarathiDescription());
+
+            // if your DTO contains departmentId, status and photoRequired fields:
+            if (complaint.getDepartment() != null) {
+                dto.setDepartmentId(complaint.getDepartment().getDepartmentId());
+            }
+            // these setters depend on your DTO fields — remove if not present
+            try {
+                dto.setStatus(complaint.getStatus());
+                dto.setPhotoRequired(complaint.getPhotoRequired());
+            } catch (NoSuchMethodError ignored) {
+                // ignore if DTO doesn't have these fields / setters
+            }
+
+            return dto;
+        }
+
+
+
 
         public void updateEstimatedTime(Request request) {
             // Get complaint
@@ -810,6 +892,8 @@
             complaint.setMarathiName(dto.getMarathiName());
             complaint.setMarathiDescription(dto.getMarathiDescription());
             complaint.setDepartment(department);
+            complaint.setStatus(dto.isStatus());
+            complaint.setPhotoRequired(dto.isPhotoRequired());
 
             PredefinedComplaint saved = predefinedComplaintRepository.save(complaint);
 
@@ -820,7 +904,8 @@
             response.setMarathiName(saved.getMarathiName());
             response.setMarathiDescription(saved.getMarathiDescription());
             response.setDepartmentId(saved.getDepartment().getDepartmentId());
-
+            response.setStatus(saved.getStatus());
+            response.setPhotoRequired(saved.getPhotoRequired());
             return response;
         }
 

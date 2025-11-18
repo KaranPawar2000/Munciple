@@ -35,9 +35,9 @@ public class PredefinedComplaint {
     private String marathiDescription;
 
     @Column(name = "status", nullable = false)
-    private boolean status;
+    private Boolean  status;
 
     @Column(name = "photo", nullable = false)
-    private boolean photoRequired;
+    private Boolean photoRequired;
 
 }
